@@ -49,9 +49,15 @@ const validators = {
     }
 };
 
+const extendValidators = (k,fn)=> {
+    validators[k] = fn;
+};
+
 class Form extends PureComponent {
 
     errors = new Map()
+
+    form = null
 
     reportError = (field,message) => {
         console.log('Form.reportError')
@@ -101,6 +107,10 @@ class Form extends PureComponent {
     }
 }
 
+const FormError = ({className='',error='',style={}}) => {
+    return error ? <div {...{className,style}}>{error}</div> : null;
+};
+
 class BaseInput extends PureComponent {
 
     static defaultProps = {
@@ -108,27 +118,26 @@ class BaseInput extends PureComponent {
         value:'',
         name:'',
         type:'',
+        placeholder:'',
         validate:(e,cb=(errMsg)=>{})=>{cb()},
         required: false,
         label:'',
-        className:'form-group'
-    };
+        classes:{
+            formGroup:'',
+            input:'',
+            label:'',
+            error:''
+        }
+    }
 
     state = {
         error: false,
         message:''
-    };
-
-    form = null;
-
-    el = null;
-
-    input = null;
-
-    noForm = {
-        reportError:()=>{},
-        clearError:()=>{}
     }
+
+    form = null
+
+    input = null
 
     setValidator(){
         var validator = Input.defaultProps.validate;
@@ -154,7 +163,10 @@ class BaseInput extends PureComponent {
 
     onChange = (e) => {
         if(!this.form){
-            this.form = this.el.closest('form[data-react-model]') || this.noForm;//some inputs may not be in a form.
+            this.form = this.input.closest('form[data-react-model]') || {
+                reportError:()=>{},
+                clearError:()=>{}
+            };//some inputs may not be in a form, so noop
         }
         
         this.props.onChange(e);
@@ -164,7 +176,7 @@ class BaseInput extends PureComponent {
         if(this.props.required && !value){
             const message = 'Required';
             this.setState({error:true,message});
-            this.form.reportError(this.props.name,`${this.props.label||this.props.field} is required`)
+            this.form.reportError(this.props.name,message);
             return;
         }
         this.validator(value,(message)=>{
@@ -185,32 +197,32 @@ class BaseInput extends PureComponent {
 
 
 class Input extends BaseInput {
-    renderInput({type,name,value,onChange}) {
-        return <input ref={ref=>this.input=ref} {...{type,name,value,onChange}} data-react-model />;
+    renderInput({type,name,placeholder,value,onChange,className}) {
+        return <input ref={ref=>this.input=ref} {...{type,name,placeholder,value,onChange,className}} data-react-model />;
     }
 
     render() {
-        const {type,name,value,label,className,children} = this.props;
+        const {type,name,placeholder,value,label,classes,children} = this.props;
         const {error,message} = this.state;
         return (
-            <div ref={ref=>this.el=ref} className={className+(error?' has-error': value==''?'':' has-valid')}>
-                <label>{label}</label>
-                {this.renderInput({type,name,value,onChange:this.onChange,children})}
-                {error && <small>*{message}</small>}
+            <div className={classes.formGroup+(error?' has-error': value==''?'':' has-valid')}>
+                <label className={classes.label}>{label}</label>
+                {this.renderInput({type,name,placeholder,value,onChange:this.onChange,children,className:classes.input})}
+                {error && <p className={classes.error}>*{message}</p>}
             </div>
         );
     }
 }
 
 class Textarea extends Input {
-    renderInput({name,value,onChange}) {
-        return <textarea {...{name,value,onChange}} data-react-model />;
+    renderInput({name,value,placeholder,onChange,className}) {
+        return <textarea ref={ref=>this.input=ref} {...{name,placeholder,value,onChange,className}} data-react-model />;
     }
 }
 
 class Select extends Input {
-    renderInput({name,value,onChange,children}) {
-        return <select ref={ref=>this.input=ref} {...{name,value,onChange}} data-react-model>{children}</select>;
+    renderInput({name,value,placeholder,onChange,children,className}) {
+        return <select ref={ref=>this.input=ref} {...{name,placeholder,value,onChange,className}} data-react-model>{children}</select>;
     }
 }
 
@@ -252,4 +264,4 @@ const withModels = (c) => {
 };
 
 
-export {withModels,validators,Form,BaseInput,Input,Textarea,Select};
+export {withModels,validators,extendValidators,Form,FormError,BaseInput,Input,Textarea,Select};
