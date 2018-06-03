@@ -226,15 +226,55 @@ class Select extends Input {
     }
 }
 
+function parsePath(path) {
+    const paths = path.split('.');
+    return paths.length > 1 ? paths : paths[0];
+}
+
+function getValue(ctx,name) {
+    var context = ctx.state;
+    const path = parsePath(name);
+    if(Array.isArray(path)) {
+        let value = context;
+        for(let i=0;i<path.length;i++) {
+            value=value[path[i]];
+        }
+        return value;
+    }else{
+        return context[name];
+    }
+}
+
+function getUpdate(ctx,name,value) {
+    var context = ctx.state;
+    const path = parsePath(name);
+    if(Array.isArray(path)) {
+        const top = path.shift();
+        var state = { [top]: {...context[top] } };
+        var obj = state;
+        obj = obj[top];
+        for(let i=0;i<path.length-1;i++) {
+            obj = obj[path[i]];
+        }
+        obj[path[path.length-1]] = value;
+        return state;
+    }else{
+        return {[name]:value}
+    }
+}
+
 const withModels = (c) => {
 
     c.prototype.model = function(name,type="text"){
         return {
             onChange: (e)=>{
-                const value = determineValue(e);
-                this.setState({[name]:value})
+                var val = e;//components like react select pass primitive values
+                if(e.hasOwnProperty('target')){
+                    val = e.target.value;//normal inputs dont
+                }
+                this.setState(getUpdate(this,name,val))
             },
-            value: this.state[name],
+            value: getValue(this,name),
             name,
             type
         };
@@ -242,8 +282,8 @@ const withModels = (c) => {
 
     c.prototype.checkbox = function(name,value=null){
         return {
-            onChange: (e)=>this.setState({[name]:e.target.checked}),
-            checked: this.state[name],
+            onChange: (e)=>this.setState(getUpdate(this,name,e.target.checked?value:'')),
+            checked:  getValue(this,name),
             type:'checkbox',
             name,
             value
@@ -252,8 +292,8 @@ const withModels = (c) => {
 
     c.prototype.radio = function(name,value=null){
         return {
-            onChange: (e)=>this.setState({[name]:value}),
-            checked: this.state[name] === value,
+            onChange: (e)=>e.target.checked && this.setState(getUpdate(this,name,value)),
+            checked:  getValue(this,name)===value,
             type:'radio',
             name,
             value
