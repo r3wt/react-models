@@ -60,14 +60,12 @@ class Form extends PureComponent {
     form = null
 
     reportError = (field,message) => {
-        console.log('Form.reportError')
-        var errors = this.errors.get(field) || [];
+        const errors = this.errors.get(field) || [];
         errors.push(message);
         this.errors.set(field,errors);
     }
 
     clearError = (field) => {
-        console.log('Form.clearError');
         this.errors.delete(field);
     }
 
@@ -100,7 +98,12 @@ class Form extends PureComponent {
 
     render(){
         return (
-            <form onSubmit={this.submit} ref={ref=>this.form=ref} data-react-model>
+            <form onSubmit={this.submit} ref={ref=>{
+                this.form=ref;
+                if(this.props.ref) {
+                    this.props.ref(ref);//allow to get ref
+                }
+            }} data-react-model>
                 {this.props.children}
             </form>
         )
