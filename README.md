@@ -38,7 +38,7 @@ import {withModels} from 'react-models';
                 <input {...this.model('user.lastname')} />
                 
                 <label>Password</label>
-                <input {...this.model('user.password',this.state.showPassword?'text':'password')}>
+                <input {...this.model('user.password',this.state.showPassword?'text':'password')} />
                 <div>
                     <label>Show Password</label>
                     <input {...this.checkbox('showPassword',true)} />
