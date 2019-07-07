@@ -237,6 +237,4 @@ const withModels = (c) => {
     return c;
 };
 
-const FormError = ({error}) => error ? <div class="alert">{error}</div> : null;
-
-export { withModels, Form, FormError, BaseInput, Input, Textarea, Select };
+export { withModels, Form, BaseInput, Input, Textarea, Select };

@@ -1,14 +1,21 @@
 # react models
 ----
-models for your react components. 
+easy and convenient models for your react components (inspired by `ng-model` from angular.js)
 
 # api
 ----
-`@withModels` - decorates your components with 3 convenience functions `model`,`checkbox`, and `radio`. nested paths have basic support, it may not work with arrays currently but support is planned. you simply call the function(s) in your markup and use the spread operator to apply it to the input components as necessary. should work with both dom inputs and custom components as well.
+`@withModels` - use this decorator on the compents you'd like to use models with. `model`,`checkbox`, and `radio` functions will be added to the component. nested paths have basic support, it may not work with arrays currently but support is planned. you simply call the function(s) in your markup and use the spread operator to apply it to the input components as necessary. should work with both dom inputs and custom components as well.
 
-    `model(str statePath,str inputType)` - the statePath of the value, and the inputType, which defaults to 'text'
-    `checkbox(str statePath,mixed checkedValue) - the statePath of the value, and the checkedValue is the value applied when the checkbox is selected.
-    `radio(str statePath, mixed optionValue ) - the statepath of the value, and the optionValue is the value applied when the radio is selected.
+`this.model(str statePath,str inputType)` - the statePath of the value, and the inputType, which defaults to 'text'
+`this.checkbox(str statePath,mixed checkedValue) - the statePath of the value, and the checkedValue is the value applied when the checkbox is selected.
+`this.radio(str statePath, mixed optionValue ) - the statepath of the value, and the optionValue is the value applied when the radio is selected.
+
+# component api
+----
+Several components are provided for you to get started with. 
+
+`Form` - a form component. it can track child inputs and report errors.
+
 
 example usage:
 ```js
